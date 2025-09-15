@@ -112,6 +112,7 @@ export default function NotesPage() {
       setTenantPlan('PRO');
     } else alert('Upgrade failed');
   }
+  
 
   return (
     <div className="container">
