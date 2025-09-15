@@ -1,43 +1,132 @@
+// // prisma/seed.js
+// const { PrismaClient } = require('@prisma/client');
+// const bcrypt = require('bcryptjs');
+
+// const prisma = new PrismaClient();
+
+// async function main() {
+//   // Create tenants
+//   const acme = await prisma.tenant.upsert({
+//     where: { slug: 'acme' },
+//     update: {},
+//     create: {
+//       slug: 'acme',
+//       name: 'Acme Inc',
+//       plan: 'FREE',
+//     },
+//   });
+
+//   const globex = await prisma.tenant.upsert({
+//     where: { slug: 'globex' },
+//     update: {},
+//     create: {
+//       slug: 'globex',
+//       name: 'Globex Corp',
+//       plan: 'FREE',
+//     },
+//   });
+
+//   // Hash password "password"
+//   const hashedPassword = await bcrypt.hash('password', 10);
+
+//   // Users for Acme
+//   await prisma.user.upsert({
+//     where: { email: 'admin@acme.test' },
+//     update: {},
+//     create: {
+//       email: 'admin@acme.test',
+//       password: hashedPassword,
+//       role: 'ADMIN',
+//       tenantId: acme.id,
+//     },
+//   });
+
+//   await prisma.user.upsert({
+//     where: { email: 'user@acme.test' },
+//     update: {},
+//     create: {
+//       email: 'user@acme.test',
+//       password: hashedPassword,
+//       role: 'MEMBER',
+//       tenantId: acme.id,
+//     },
+//   });
+
+//   // Users for Globex
+//   await prisma.user.upsert({
+//     where: { email: 'admin@globex.test' },
+//     update: {},
+//     create: {
+//       email: 'admin@globex.test',
+//       password: hashedPassword,
+//       role: 'ADMIN',
+//       tenantId: globex.id,
+//     },
+//   });
+
+//   await prisma.user.upsert({
+//     where: { email: 'user@globex.test' },
+//     update: {},
+//     create: {
+//       email: 'user@globex.test',
+//       password: hashedPassword,
+//       role: 'MEMBER',
+//       tenantId: globex.id,
+//     },
+//   });
+// }
+
+// main()
+//   .then(async () => {
+//     console.log('✅ Database has been seeded.');
+//     await prisma.$disconnect();
+//   })
+//   .catch(async (e) => {
+//     console.error(e);
+//     await prisma.$disconnect();
+//     process.exit(1);
+//   });
+
+
 // prisma/seed.js
-const { PrismaClient } = require('@prisma/client');
-const bcrypt = require('bcryptjs');
+import bcrypt from 'bcryptjs';
+import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
 async function main() {
-  // Create tenants
-  const acme = await prisma.tenant.upsert({
+  // Create Tenants
+  const acmeTenant = await prisma.tenant.upsert({
     where: { slug: 'acme' },
     update: {},
     create: {
       slug: 'acme',
-      name: 'Acme Inc',
+      name: 'Acme',
       plan: 'FREE',
     },
   });
 
-  const globex = await prisma.tenant.upsert({
+  const globexTenant = await prisma.tenant.upsert({
     where: { slug: 'globex' },
     update: {},
     create: {
       slug: 'globex',
-      name: 'Globex Corp',
+      name: 'Globex',
       plan: 'FREE',
     },
   });
 
-  // Hash password "password"
-  const hashedPassword = await bcrypt.hash('password', 10);
+  // Create Users
+  const passwordHash = await bcrypt.hash('password', 10);
 
-  // Users for Acme
   await prisma.user.upsert({
     where: { email: 'admin@acme.test' },
     update: {},
     create: {
       email: 'admin@acme.test',
-      password: hashedPassword,
+      password: passwordHash,
       role: 'ADMIN',
-      tenantId: acme.id,
+      tenantId: acmeTenant.id,
     },
   });
 
@@ -46,21 +135,20 @@ async function main() {
     update: {},
     create: {
       email: 'user@acme.test',
-      password: hashedPassword,
+      password: passwordHash,
       role: 'MEMBER',
-      tenantId: acme.id,
+      tenantId: acmeTenant.id,
     },
   });
 
-  // Users for Globex
   await prisma.user.upsert({
     where: { email: 'admin@globex.test' },
     update: {},
     create: {
       email: 'admin@globex.test',
-      password: hashedPassword,
+      password: passwordHash,
       role: 'ADMIN',
-      tenantId: globex.id,
+      tenantId: globexTenant.id,
     },
   });
 
@@ -69,20 +157,20 @@ async function main() {
     update: {},
     create: {
       email: 'user@globex.test',
-      password: hashedPassword,
+      password: passwordHash,
       role: 'MEMBER',
-      tenantId: globex.id,
+      tenantId: globexTenant.id,
     },
   });
+
+  console.log('✅ Seed completed!');
 }
 
 main()
-  .then(async () => {
-    console.log('✅ Database has been seeded.');
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });
